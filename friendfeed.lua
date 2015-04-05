@@ -164,7 +164,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
       io.stdout:write("\nI give up...\n")
       io.stdout:flush()
       return wget.actions.EXIT
-    elseif tries >= 10 then
+    elseif tries >= 17 then
       io.stdout:write("\nI give up...\n")
       io.stdout:flush()
       return wget.actions.ABORT
