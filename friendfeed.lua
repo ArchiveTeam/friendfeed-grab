@@ -26,13 +26,14 @@ end
 wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
   local url = urlpos["url"]["url"]
   local html = urlpos["link_expect_html"]
+  local itemvalue = string.gsub(item_value, "%-", "%%-")
   
   if downloaded[url] == true or addedtolist[url] == true then
     return false
   end
   
   if item_type == "account" and (downloaded[url] ~= true or addedtolist[url] ~= true) then
-    if string.match(url, "friendfeed%.com/"..item_value) or string.match("friendfeed%-media%.com") then
+    if string.match(url, "friendfeed%.com/"..itemvalue) or string.match("friendfeed%-media%.com") then
       return true
     elseif html == 0 then
       return true
@@ -47,6 +48,7 @@ end
 wget.callbacks.get_urls = function(file, url, is_css, iri)
   local urls = {}
   local html = nil
+  local itemvalue = string.gsub(item_value, "%-", "%%-")
   
   local function check(url)
     if (downloaded[url] ~= true and addedtolist[url] ~= true) and not (string.match(url, "&amp;ncursor") or string.match(url, "&ncursor") or string.match(url, "&amp;pcursor") or string.match(url, "&pcursor") or string.match(url, "amp;amp;")) then
@@ -68,10 +70,10 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
       local newurl = string.match(url, "(https?://[^%?]+)%?")
       check(newurl)
     end
-    if string.match(url, "friendfeed%.com/"..item_value) or string.match(url, "friendfeed%-api%.com") then
+    if string.match(url, "friendfeed%.com/"..itemvalue) or string.match(url, "friendfeed%-api%.com") then
       html = read_file(file)
       for newurl in string.gmatch(html, '"(/[^"]+)"') do
-        if string.match(newurl, "/"..item_value) or string.match(newurl, "/static") then
+        if string.match(newurl, "/"..itemvalue) or string.match(newurl, "/static") then
           if string.match(newurl, "&amp;ncursor=") then
             local nurl = "http://friendfeed.com"..string.match(newurl, "(/[^&]+)&amp;ncursor=")
             check(nurl)
@@ -85,7 +87,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
         end
       end
       for newurl in string.gmatch(html, '"(https?://[^"]+)"') do
-        if string.match(newurl, "friendfeed%-api%.com") or string.match(newurl, "friendfeed%-media%.com") or string.match(newurl, "friendfeed%.com/"..item_value) then
+        if string.match(newurl, "friendfeed%-api%.com") or string.match(newurl, "friendfeed%-media%.com") or string.match(newurl, "friendfeed%.com/"..itemvalue) then
           check(newurl)
         end
       end
@@ -104,11 +106,11 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
         end
       end
     end
-    if string.match(url, "https?://friendfeed%-api%.com/v2/feed/"..item_value.."%?pretty=1&num=100&start=[0-9]+&hidden=1&raw=1") then
+    if string.match(url, "https?://friendfeed%-api%.com/v2/feed/"..itemvalue.."%?pretty=1&num=100&start=[0-9]+&hidden=1&raw=1") then
       html = read_file(file)
       if html ~= api1 then
         api1 = html
-        local start = string.match(url, "http://friendfeed%-api%.com/v2/feed/[^%?]+%?pretty=1&num=100&start=([0-9]+)&hidden=1&raw=1")
+        local start = string.match(url, "https?://friendfeed%-api%.com/v2/feed/"..itemvalue.."%?pretty=1&num=100&start=([0-9]+)&hidden=1&raw=1")
         if start ~= 10000 then
           local nstart = start + 100
           local newurl = "http://friendfeed-api.com/v2/feed/"..item_value.."?pretty=1&num=100&start="..nstart.."&hidden=1&raw=1"
