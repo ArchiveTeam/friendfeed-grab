@@ -173,7 +173,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     end
   elseif status_code >= 500 or
     (status_code >= 400 and status_code ~= 404 and status_code ~= 403) then
-    if not (string.match(url["url"], "friendfeed%.com") or string.match(url["url"], "friendfeed%-grab%.com")) then
+    if not (string.match(url["url"], "friendfeed%.com") or string.match(url["url"], "friendfeed%-grab%.com") or string.match(url["url"], "friendfeed%-api%.com")) then
       return wget.actions.EXIT
     end
 
@@ -192,7 +192,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
       return wget.actions.CONTINUE
     end
   elseif status_code == 0 then
-    if not (string.match(url["url"], "friendfeed%.com") or string.match(url["url"], "friendfeed%-grab%.com")) then
+    if not (string.match(url["url"], "friendfeed%.com") or string.match(url["url"], "friendfeed%-grab%.com") or string.match(url["url"], "friendfeed%-api%.com")) then
       return wget.actions.EXIT
     end
 
