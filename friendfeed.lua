@@ -33,7 +33,7 @@ wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_pars
   end
   
   if item_type == "account" and (downloaded[url] ~= true or addedtolist[url] ~= true) then
-    if (string.match(url, "friendfeed%.com/"..itemvalue) or string.match(url, "friendfeed%-media%.com")) and not (string.match(url, "friendfeed%.com/e/") or string.match(url, "friendfeed%.com/"..item_value.."/[a-z0-9]+/[%-a-z0-9]+")) then
+    if (string.match(url, "friendfeed%.com/"..itemvalue) or string.match(url, "friendfeed%-media%.com")) and not (string.match(url, "friendfeed%.com/e/") or string.match(url, "friendfeed%.com/"..itemvalue.."/[a-z0-9]+/[%-a-z0-9]+")) then
       return true
     elseif html == 0 then
       return true
@@ -57,7 +57,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
         table.insert(urls, { url=url })
         addedtolist[url] = true
       end
-    elseif (downloaded[url] ~= true and addedtolist[url] ~= true) and not (string.match(url, "&amp;ncursor") or string.match(url, "&ncursor") or string.match(url, "&amp;pcursor") or string.match(url, "&pcursor") or string.match(url, "amp;amp;") or string.match(url, "https?://m%.friendfeed%-media%.com/p%-[0-9a-z]+%-[a-z]+%-[0-9]+") or string.match(url, "friendfeed%.com/"..item_value.."/[a-z0-9]+/[%-a-z0-9]+") or string.match(url, "friendfeed%.com/static/")) then
+    elseif (downloaded[url] ~= true and addedtolist[url] ~= true) and not (string.match(url, "&amp;ncursor") or string.match(url, "&ncursor") or string.match(url, "&amp;pcursor") or string.match(url, "&pcursor") or string.match(url, "amp;amp;") or string.match(url, "https?://m%.friendfeed%-media%.com/p%-[0-9a-z]+%-[a-z]+%-[0-9]+") or string.match(url, "friendfeed%.com/"..itemvalue.."/[a-z0-9]+/[%-a-z0-9]+") or string.match(url, "friendfeed%.com/static/") or string.match(url, "order=alphabetical") or string.match(url, "format=atom")) then
       if item_type == "accountfull" then
         table.insert(urls, { url=url })
         addedtolist[url] = true
@@ -73,7 +73,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
   end
   
   if item_type == "account" then
-    if string.match(url, "friendfeed%.com/"..item_value) and not string.match(url, "friendfeed.com/"..item_value.."/") then
+    if string.match(url, "friendfeed%.com/"..itemvalue) and not string.match(url, "friendfeed.com/"..itemvalue.."/") then
       html = read_file(file)
       local newurl = string.match(html, '"(https?://m%.friendfeed%-media%.com/p%-[0-9a-z]+%-[a-z]+%-[0-9]+)"')
       if newurl and downloaded[newurl] ~= true and addedtolist[newurl] ~= true then
@@ -99,7 +99,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
           elseif string.match(newurl, "&ncursor=") then
             local nurl = "http://friendfeed.com"..string.match(newurl, "(/[^&]+)&ncursor=")
             check(nurl)
-          else
+          elseif not string.match(html, '<a class="date" href="'..newurl..'">[^>]+<%/a>') then
             local nurl = "http://friendfeed.com"..newurl
             check(nurl)
           end
@@ -219,10 +219,12 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     if tries >= 3 and string.match(url["url"], "friendfeed%-media%.com") then
       io.stdout:write("\nI give up...\n")
       io.stdout:flush()
+      tries = 0
       return wget.actions.EXIT
     elseif tries >= 17 then
       io.stdout:write("\nI give up...\n")
       io.stdout:flush()
+      tries = 0
       return wget.actions.ABORT
     else
       return wget.actions.CONTINUE
@@ -243,6 +245,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     if tries >= 20 then
       io.stdout:write("\nI give up...\n")
       io.stdout:flush()
+      tries = 0
       return wget.actions.ABORT
     else
       return wget.actions.CONTINUE
@@ -262,6 +265,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     if tries >= 10 then
       io.stdout:write("\nI give up...\n")
       io.stdout:flush()
+      tries = 0
       return wget.actions.ABORT
     else
       return wget.actions.CONTINUE
