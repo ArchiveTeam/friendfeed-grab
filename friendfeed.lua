@@ -33,7 +33,7 @@ wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_pars
   end
   
   if item_type == "account" and (downloaded[url] ~= true or addedtolist[url] ~= true) then
-    if string.match(url, "friendfeed%.com/"..itemvalue) or string.match("friendfeed%-media%.com") then
+    if (string.match(url, "friendfeed%.com/"..itemvalue) or string.match(url, "friendfeed%-media%.com")) and not (string.match(url, "friendfeed%.com/e/") or string.match(url, "friendfeed%.com/"..item_value.."/[a-z0-9]+/[%-a-z0-9]+")) then
       return true
     elseif html == 0 then
       return true
@@ -51,9 +51,20 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
   local itemvalue = string.gsub(item_value, "%-", "%%-")
   
   local function check(url)
-    if (downloaded[url] ~= true and addedtolist[url] ~= true) and not (string.match(url, "&amp;ncursor") or string.match(url, "&ncursor") or string.match(url, "&amp;pcursor") or string.match(url, "&pcursor") or string.match(url, "amp;amp;")) then
-      table.insert(urls, { url=url })
-      addedtolist[url] = true
+    if downloaded[url] ~= true and addedtolist[url] ~= true and string.match(url, "friendfeed%.com/static/") then
+      local num = math.random(1, 100)
+      if num == 14 then
+        table.insert(urls, { url=url })
+        addedtolist[url] = true
+      end
+    elseif (downloaded[url] ~= true and addedtolist[url] ~= true) and not (string.match(url, "&amp;ncursor") or string.match(url, "&ncursor") or string.match(url, "&amp;pcursor") or string.match(url, "&pcursor") or string.match(url, "amp;amp;") or string.match(url, "https?://m%.friendfeed%-media%.com/p%-[0-9a-z]+%-[a-z]+%-[0-9]+") or string.match(url, "friendfeed%.com/"..item_value.."/[a-z0-9]+/[%-a-z0-9]+") or string.match(url, "friendfeed%.com/static/")) then
+      if item_type == "accountfull" then
+        table.insert(urls, { url=url })
+        addedtolist[url] = true
+      elseif item_type == "account" and not (string.match(url, "friendfeed%.com/e/")) then
+        table.insert(urls, { url=url })
+        addedtolist[url] = true
+      end
     elseif string.match(url, "&amp;ncursor") or string.match(url, "&ncursor") or string.match(url, "&amp;pcursor") or string.match(url, "&pcursor") or string.match(url, "amp;amp;") then
       local newurl = string.match(url, "(https?://[^&]+)&")
       table.insert(urls, { url=newurl })
@@ -62,6 +73,51 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
   end
   
   if item_type == "account" then
+    if string.match(url, "friendfeed%.com/"..item_value) and not string.match(url, "friendfeed.com/"..item_value.."/") then
+      html = read_file(file)
+      local newurl = string.match(html, '"(https?://m%.friendfeed%-media%.com/p%-[0-9a-z]+%-[a-z]+%-[0-9]+)"')
+      if downloaded[newurl] ~= true and addedtolist[newurl] ~= true then
+        table.insert(urls, { url=newurl })
+        addedtolist[newurl] = true
+      end
+    end
+    if string.match(url, "&") then
+      local newurl = string.match(url, "(https?://[^&]+)&")
+      check(newurl)
+    end
+    if string.match(url, "%?") then
+      local newurl = string.match(url, "(https?://[^%?]+)%?")
+      check(newurl)
+    end
+    if string.match(url, "friendfeed%.com/"..itemvalue) or string.match(url, "friendfeed%-api%.com") then
+      html = read_file(file)
+      for newurl in string.gmatch(html, '"(/[^"]+)"') do
+        if string.match(newurl, "/"..itemvalue) or string.match(newurl, "/static") then
+          if string.match(newurl, "&amp;ncursor=") then
+            local nurl = "http://friendfeed.com"..string.match(newurl, "(/[^&]+)&amp;ncursor=")
+            check(nurl)
+          elseif string.match(newurl, "&ncursor=") then
+            local nurl = "http://friendfeed.com"..string.match(newurl, "(/[^&]+)&ncursor=")
+            check(nurl)
+          else
+            local nurl = "http://friendfeed.com"..newurl
+            check(nurl)
+          end
+        end
+      end
+      for newurl in string.gmatch(html, '"(https?://[^"]+)"') do
+        if string.match(newurl, "friendfeed%-api%.com") or string.match(newurl, "friendfeed%-media%.com") or string.match(newurl, "friendfeed%.com/"..itemvalue) then
+          check(newurl)
+        end
+      end
+      for newurl in string.gmatch(html, '"id": "([^"]+)"') do
+        if string.match(newurl, "[^/]+/[^/]+") then
+          local nurl = "http://friendfeed.com/"..newurl
+          check(nurl)
+        end
+      end
+    end
+  elseif item_type == "accountfull" then
     if string.match(url, "&") then
       local newurl = string.match(url, "(https?://[^&]+)&")
       check(newurl)
