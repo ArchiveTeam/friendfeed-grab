@@ -57,7 +57,7 @@ if not WGET_LUA:
 #
 # Update this each time you make a non-cosmetic change.
 # It will be added to the WARC files and reported to the tracker.
-VERSION = "20150406.02"
+VERSION = "20150406.03"
 USER_AGENT = 'ArchiveTeam'
 TRACKER_ID = 'friendfeed'
 TRACKER_HOST = 'tracker.archiveteam.org'
@@ -194,13 +194,11 @@ class WgetArgs(object):
         item['item_type'] = item_type
         item['item_value'] = item_value
         
-        assert item_type in ('account')
+        assert item_type in ('account', 'accountfull')
         
         if item_type == 'account':
-            # wget_args.append('http://friendfeed-api.com/v2/picture/{0}'.format(item_value))
-            # wget_args.append('http://friendfeed-api.com/v2/picture/{0}?size=small'.format(item_value))
-            # wget_args.append('http://friendfeed-api.com/v2/picture/{0}?size=medium'.format(item_value))
-            # wget_args.append('http://friendfeed-api.com/v2/picture/{0}?size=large'.format(item_value))
+            wget_args.append('http://friendfeed.com/{0}'.format(item_value))
+        elif item_type == 'accountfull':
             wget_args.append('http://friendfeed-api.com/v2/feed/{0}?pretty=1&num=100&start=0&hidden=1&raw=1'.format(item_value))
             wget_args.append('http://friendfeed.com/{0}'.format(item_value))
         else:
