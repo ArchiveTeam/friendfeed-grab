@@ -76,7 +76,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
     if string.match(url, "friendfeed%.com/"..item_value) and not string.match(url, "friendfeed.com/"..item_value.."/") then
       html = read_file(file)
       local newurl = string.match(html, '"(https?://m%.friendfeed%-media%.com/p%-[0-9a-z]+%-[a-z]+%-[0-9]+)"')
-      if downloaded[newurl] ~= true and addedtolist[newurl] ~= true then
+      if newurl and downloaded[newurl] ~= true and addedtolist[newurl] ~= true then
         table.insert(urls, { url=newurl })
         addedtolist[newurl] = true
       end
